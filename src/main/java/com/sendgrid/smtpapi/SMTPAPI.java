@@ -9,7 +9,7 @@ import org.json.JSONException;
 
 public class SMTPAPI {
 
-  private static final String VERSION = "1.2.0";
+  private static final String VERSION = "1.2.1";
 
   private JSONObject header = new JSONObject();
 
