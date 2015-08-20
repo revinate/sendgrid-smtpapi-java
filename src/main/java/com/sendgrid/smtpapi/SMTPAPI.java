@@ -205,6 +205,15 @@ public class SMTPAPI {
 
   }
 
+  public SMTPAPI setIpPool(String ipPool) throws JSONException {
+    this.header.put("ip_pool", ipPool);
+    return this;
+  }
+
+  public String getIpPool() throws JSONException {
+    return this.header.getString("ip_pool");
+  }
+
   // convert from string to code point array
   private int[] toCodePointArray(String input) {
     int len = input.length();
