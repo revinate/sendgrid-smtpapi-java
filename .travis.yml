@@ -1,9 +1,10 @@
 language: java
-script: ./gradlew clean build
+script: ./gradlew build
 
 sudo: false
 
 jdk:
+  - oraclejdk8
   - oraclejdk7
   - openjdk7
   - openjdk6

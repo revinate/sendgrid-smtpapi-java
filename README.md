@@ -3,6 +3,7 @@
 This module will let you build SendGrid's SMTP API headers with simplicity.
 
 [![BuildStatus](https://travis-ci.org/revinate/sendgrid-smtpapi-java.svg?branch=master)](https://travis-ci.org/revinate/sendgrid-smtpapi-java)
+[![BuildStatus](https://maven-badges.herokuapp.com/maven-central/com.revinate/sendgrid-smtpapi-java/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.revinate/sendgrid-smtpapi-java)
 
 ## Installing
 
@@ -140,4 +141,6 @@ String rawJson = header.rawJsonString();
 ./gradlew check
 ```
 
-## MIT
+## License
+
+Licensed under the MIT License.
