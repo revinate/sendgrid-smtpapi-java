@@ -12,7 +12,7 @@ This module will let you build SendGrid's SMTP API headers with simplicity.
 ...
 dependencies {
   ...
-  compile 'com.sendgrid:smtpapi-java:1.2.0'
+  compile 'com.revinate:sendgrid-smtpapi-java:1.2.1'
 }
 
 repositories {
@@ -24,7 +24,7 @@ repositories {
 Then import the library - in the file appropriate to your Java project.
 
 ```java
-import com.sendgrid.smtpapi.SMTPAPI;
+import com.revinate.sendgrid.smtpapi.SMTPAPI;
 ```
 
 ## Examples
@@ -32,7 +32,7 @@ import com.sendgrid.smtpapi.SMTPAPI;
 ### Create headers
 
 ```java
-import com.sendgrid.smtpapi.SMTPAPI;
+import com.revinate.sendgrid.smtpapi.SMTPAPI;
 SMTPAPI header = new SMTPAPI();
 ```
 

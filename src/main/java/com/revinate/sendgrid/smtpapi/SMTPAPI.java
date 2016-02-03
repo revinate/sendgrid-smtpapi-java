@@ -1,4 +1,4 @@
-package com.sendgrid.smtpapi;
+package com.revinate.sendgrid.smtpapi;
 
 import org.json.JSONArray;
 import org.json.JSONException;
