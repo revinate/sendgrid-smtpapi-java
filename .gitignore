@@ -6,4 +6,3 @@ settings.gradle
 out
 .DS_Store
 gradle.properties
-repo
