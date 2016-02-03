@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class SMTPAPI {
@@ -14,7 +15,6 @@ public class SMTPAPI {
     private JSONObject header = new JSONObject();
 
     public SMTPAPI() {
-
     }
 
     public SMTPAPI(JSONObject header) {
@@ -26,7 +26,7 @@ public class SMTPAPI {
     }
 
     private static String[] toArray(JSONArray json) {
-        ArrayList<String> parse = new ArrayList<String>();
+        List<String> parse = new ArrayList<String>();
         for (int i = 0; i < json.length(); i++) {
             parse.add(json.getString(i));
         }
@@ -41,15 +41,15 @@ public class SMTPAPI {
         return this;
     }
 
-    public SMTPAPI addTos(String[] to) throws JSONException {
-        for (int i = 0; i < to.length; i++) {
-            addTo(to[i]);
+    public SMTPAPI addTos(String[] tos) throws JSONException {
+        for (String to : tos) {
+            addTo(to);
         }
         return this;
     }
 
-    public SMTPAPI setTos(String[] to) throws JSONException {
-        this.header.put("to", new JSONArray(to));
+    public SMTPAPI setTos(String[] tos) throws JSONException {
+        this.header.put("to", new JSONArray(tos));
         return this;
     }
 
@@ -69,9 +69,9 @@ public class SMTPAPI {
         return this;
     }
 
-    public SMTPAPI addSubstitutions(String key, String[] val) throws JSONException {
-        for (int i = 0; i < val.length; i++) {
-            addSubstitution(key, val[i]);
+    public SMTPAPI addSubstitutions(String key, String[] vals) throws JSONException {
+        for (String val : vals) {
+            addSubstitution(key, val);
         }
         return this;
     }
@@ -116,14 +116,14 @@ public class SMTPAPI {
     }
 
     public SMTPAPI addCategories(String[] vals) throws JSONException {
-        for (int i = 0; i < vals.length; i++) {
-            addCategory(vals[i]);
+        for (String val : vals) {
+            addCategory(val);
         }
         return this;
     }
 
-    public SMTPAPI setCategories(String[] cat) throws JSONException {
-        this.header.put("category", cat);
+    public SMTPAPI setCategories(String[] categories) throws JSONException {
+        this.header.put("category", categories);
         return this;
     }
 
@@ -139,13 +139,12 @@ public class SMTPAPI {
         return this;
     }
 
-    public SMTPAPI setSections(Map<String, String> sec) throws JSONException {
-        return this.setSections(new JSONObject(sec));
+    public SMTPAPI setSections(Map<String, String> sections) throws JSONException {
+        return this.setSections(new JSONObject(sections));
     }
 
-
-    public SMTPAPI setSections(JSONObject sec) throws JSONException {
-        this.header.put("section", sec);
+    public SMTPAPI setSections(JSONObject sections) throws JSONException {
+        this.header.put("section", sections);
         return this;
     }
 
@@ -202,7 +201,6 @@ public class SMTPAPI {
 
     public int getSendAt() throws JSONException {
         return this.header.getInt("send_at");
-
     }
 
     public SMTPAPI setIpPool(String ipPool) throws JSONException {
@@ -226,18 +224,17 @@ public class SMTPAPI {
 
     private String escapeUnicode(String input) {
         StringBuilder sb = new StringBuilder();
-        int[] codePointArray = toCodePointArray(input);
-        int len = codePointArray.length;
-        for (int i = 0; i < len; i++) {
-            if (codePointArray[i] > 65535) {
+        int[] codePoints = toCodePointArray(input);
+        for (int codePoint : codePoints) {
+            if (codePoint > 65535) {
                 // surrogate pair
-                int hi = (codePointArray[i] - 0x10000) / 0x400 + 0xD800;
-                int lo = (codePointArray[i] - 0x10000) % 0x400 + 0xDC00;
+                int hi = (codePoint - 0x10000) / 0x400 + 0xD800;
+                int lo = (codePoint - 0x10000) % 0x400 + 0xDC00;
                 sb.append(String.format("\\u%04x\\u%04x", hi, lo));
-            } else if (codePointArray[i] > 127) {
-                sb.append(String.format("\\u%04x", codePointArray[i]));
+            } else if (codePoint > 127) {
+                sb.append(String.format("\\u%04x", codePoint));
             } else {
-                sb.append(String.format("%c", codePointArray[i]));
+                sb.append(String.format("%c", codePoint));
             }
         }
         return sb.toString();

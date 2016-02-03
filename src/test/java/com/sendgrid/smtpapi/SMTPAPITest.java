@@ -50,7 +50,6 @@ public class SMTPAPITest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     @Test
@@ -166,5 +165,12 @@ public class SMTPAPITest {
         int expected = 12345;
         test.setSendAt(expected);
         Assert.assertEquals(expected, test.getSendAt());
+    }
+
+    @Test
+    public void testSetIpPool() throws JSONException {
+        String expected = "transactional";
+        test.setIpPool(expected);
+        Assert.assertEquals(expected, test.getIpPool());
     }
 }
