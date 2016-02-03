@@ -16,108 +16,108 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 allprojects {
-  apply plugin: 'java'
-  sourceCompatibility = 1.6
-  targetCompatibility = 1.6
+    apply plugin: 'java'
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
 }
 
-group         = 'com.sendgrid'
-version       = '1.2.1'
+group = 'com.sendgrid'
+version = '1.2.1'
 ext.packaging = 'jar'
 
 if (!hasProperty("sonatypeUsername")) {
-  ext.sonatypeUsername = null
-  ext.sonatypePassword = null
+    ext.sonatypeUsername = null
+    ext.sonatypePassword = null
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.10'
+    gradleVersion = '2.10'
 }
 
 buildscript {
-  repositories {
-    mavenCentral()
-  }
+    repositories {
+        mavenCentral()
+    }
 }
 
 dependencies {
-  compile 'org.json:json:20140107'
-  testCompile group:'org.skyscreamer', name:'jsonassert', version:'1.2.3'
-  testCompile group:'junit', name:'junit', version:'4.12'
+    compile 'org.json:json:20140107'
+    testCompile group: 'org.skyscreamer', name: 'jsonassert', version: '1.2.3'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 allprojects {
-  gradle.projectsEvaluated {
-    tasks.withType(JavaCompile) {
-      options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
     }
-  }
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-  classifier = 'javadoc'
-  from 'build/docs/javadoc'
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
 }
 
 task sourcesJar(type: Jar) {
-  from sourceSets.main.allSource
-  classifier = 'sources'
+    from sourceSets.main.allSource
+    classifier = 'sources'
 }
 
 signing {
-  required { gradle.taskGraph.hasTask("uploadArchives") }
-  sign configurations.archives
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
 }
 
 uploadArchives {
-  repositories {
-    mavenDeployer {
-      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: sonatypeUsername, password: sonatypePassword)
-      }
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
 
-      pom.project {
-        name 'smtpapi-java'
-        packaging 'jar'
-        description 'SMTPAPI Java helper library'
-        url 'https://github.com/sendgrid/smtpapi-java'
+            pom.project {
+                name 'smtpapi-java'
+                packaging 'jar'
+                description 'SMTPAPI Java helper library'
+                url 'https://github.com/sendgrid/smtpapi-java'
 
-        scm {
-          url 'scm:git@github.com:sendgrid/smtpapi-java.git'
-          connection 'scm:git@github.com:sendgrid/smtpapi-java.git'
-          developerConnection 'scm:git@github.com:sendgrid/smtpapi-java.git'
+                scm {
+                    url 'scm:git@github.com:sendgrid/smtpapi-java.git'
+                    connection 'scm:git@github.com:sendgrid/smtpapi-java.git'
+                    developerConnection 'scm:git@github.com:sendgrid/smtpapi-java.git'
+                }
+
+                licenses {
+                    license {
+                        name 'MIT License'
+                        url 'http://opensource.org/licenses/MIT'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'scottmotte'
+                        name 'Scott Motte'
+                    }
+                    developer {
+                        id 'elbuo8'
+                        name 'Yamil Asusta'
+                    }
+                }
+            }
         }
-
-        licenses {
-          license {
-            name 'MIT License'
-            url 'http://opensource.org/licenses/MIT'
-            distribution 'repo'
-          }
-        }
-
-        developers {
-          developer {
-            id 'scottmotte'
-            name 'Scott Motte'
-          }
-          developer {
-            id 'elbuo8'
-            name 'Yamil Asusta'
-          }
-        }
-      }
     }
-  }
 }
 
 artifacts {
-  archives jar
-  archives javadocJar
-  archives sourcesJar
+    archives jar
+    archives javadocJar
+    archives sourcesJar
 }
