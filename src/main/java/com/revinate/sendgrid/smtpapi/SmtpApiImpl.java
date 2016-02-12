@@ -8,7 +8,7 @@ import java.util.*;
 
 public class SmtpApiImpl implements SmtpApi {
 
-    private static final String VERSION = "1.2.1";
+    private static final String VERSION = "2.0.0";
 
     private static final String FIELD_ASM_GROUP_ID = "asm_group_id";
     private static final String FIELD_SEND_AT = "send_at";
