@@ -4,222 +4,347 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SMTPAPI {
 
     private static final String VERSION = "1.2.1";
 
+    private static final String FIELD_ASM_GROUP_ID = "asm_group_id";
+    private static final String FIELD_SEND_AT = "send_at";
+    private static final String FIELD_IP_POOL = "ip_pool";
+    private static final String FIELD_TO = "to";
+    private static final String FIELD_CATEGORY = "category";
+    private static final String FIELD_UNIQUE_ARGS = "unique_args";
+    private static final String FIELD_SECTION = "section";
+    private static final String FIELD_SUB = "sub";
+    private static final String FIELD_FILTERS = "filters";
+    private static final String FIELD_SETTINGS = "settings";
+    private static final String EMAIL_FORMAT = "%s <%s>";
+
     private JSONObject header = new JSONObject();
-
-    public SMTPAPI() {
-    }
-
-    public SMTPAPI(JSONObject header) {
-        this.header = header;
-    }
 
     public String getVersion() {
         return VERSION;
     }
 
-    private static String[] toArray(JSONArray json) {
+    public String toSmtpApiHeader() {
+        return escapeUnicode(header.toString());
+    }
+
+    public String toRawSmtpApiHeader() {
+        return header.toString();
+    }
+
+    public Integer getAsmGroupId() {
+        return getInt(FIELD_ASM_GROUP_ID);
+    }
+
+    public SMTPAPI setAsmGroupId(Integer val) {
+        header.put(FIELD_ASM_GROUP_ID, val);
+        return this;
+    }
+
+    public Integer getSendAt() {
+        return getInt(FIELD_SEND_AT);
+    }
+
+    public SMTPAPI setSendAt(Integer val) {
+        header.put(FIELD_SEND_AT, val);
+        return this;
+    }
+
+    public String getIpPool() {
+        return header.optString(FIELD_IP_POOL, null);
+    }
+
+    public SMTPAPI setIpPool(String ipPool) {
+        header.put(FIELD_IP_POOL, ipPool);
+        return this;
+    }
+
+    public List<String> getSmtpApiTos() {
+        return toListOfStrings(header.optJSONArray(FIELD_TO));
+    }
+
+    public SMTPAPI setSmtpApiTos(List<String> tos) {
+        header.put(FIELD_TO, tos);
+        return this;
+    }
+
+    public SMTPAPI addSmtpApiTo(String to) {
+        header.append(FIELD_TO, to);
+        return this;
+    }
+
+    public SMTPAPI addSmtpApiTo(String to, String name) {
+        return addSmtpApiTo(String.format(EMAIL_FORMAT, name, to));
+    }
+
+    public List<String> getCategories() {
+        return toListOfStrings(header.optJSONArray(FIELD_CATEGORY));
+    }
+
+    public SMTPAPI setCategories(List<String> categories) {
+        header.put(FIELD_CATEGORY, categories);
+        return this;
+    }
+
+    public SMTPAPI addCategory(String category) {
+        header.append(FIELD_CATEGORY, category);
+        return this;
+    }
+
+    public Map<String, String> getUniqueArgs() {
+        return toMapOfStrings(header.optJSONObject(FIELD_UNIQUE_ARGS));
+    }
+
+    public SMTPAPI setUniqueArgs(Map<String, String> args) {
+        header.put(FIELD_UNIQUE_ARGS, args);
+        return this;
+    }
+
+    public String getUniqueArg(String key) {
+        return getStringFromMap(FIELD_UNIQUE_ARGS, key);
+    }
+
+    public SMTPAPI setUniqueArg(String key, String val) {
+        setInMap(FIELD_UNIQUE_ARGS, key, val);
+        return this;
+    }
+
+    public Map<String, String> getSections() {
+        return toMapOfStrings(header.optJSONObject(FIELD_SECTION));
+    }
+
+    public SMTPAPI setSections(Map<String, String> sections) {
+        header.put(FIELD_SECTION, sections);
+        return this;
+    }
+
+    public String getSection(String key) {
+        return getStringFromMap(FIELD_SECTION, key);
+    }
+
+    public SMTPAPI setSection(String key, String val) {
+        setInMap(FIELD_SECTION, key, val);
+        return this;
+    }
+
+    public Map<String, List<String>> getSubstitutions() {
+        return toMapOfListsOfStrings(header.optJSONObject(FIELD_SUB));
+    }
+
+    public SMTPAPI setSubstitutions(Map<String, List<String>> substitutions) {
+        header.put(FIELD_SUB, substitutions);
+        return this;
+    }
+
+    public List<String> getSubstitution(String key) {
+        return getListOfStringsFromMap(FIELD_SUB, key);
+    }
+
+    public SMTPAPI setSubstitution(String key, List<String> vals) {
+        setInMap(FIELD_SUB, key, vals);
+        return this;
+    }
+
+    public SMTPAPI addValueToSubstitution(String key, String val) {
+        appendToListInMap(FIELD_SUB, key, val);
+        return this;
+    }
+
+    public Map<String, Map<String, Object>> getFilters() {
+        Map<String, Map<String, Object>> filters = new HashMap<String, Map<String, Object>>();
+        JSONObject json = header.optJSONObject(FIELD_FILTERS);
+        if (json != null) {
+            for (Object filterName : json.keySet()) {
+                if (filterName instanceof String) {
+                    String filterNameString = (String) filterName;
+                    Map<String, Object> filter = toFilter(json.optJSONObject(filterNameString));
+                    filters.put(filterNameString, filter);
+                }
+            }
+        }
+        return filters;
+    }
+
+    public SMTPAPI setFilters(Map<String, Map<String, Object>> filters) throws SMTPAPIException {
+        Map<String, Map<String, Map<String, Object>>> filtersMap =
+                new HashMap<String, Map<String, Map<String, Object>>>();
+        for (Map.Entry<String, Map<String, Object>> filter : filters.entrySet()) {
+            filtersMap.put(filter.getKey(), toFilterMap(filter.getValue()));
+        }
+        header.put(FIELD_FILTERS, filtersMap);
+        return this;
+    }
+
+    public Map<String, Object> getFilter(String filterName) {
+        JSONObject json = header.optJSONObject(FIELD_FILTERS);
+        if (json != null) {
+            return toFilter(json.optJSONObject(filterName));
+        } else {
+            return Collections.emptyMap();
+        }
+    }
+
+    public SMTPAPI setFilter(String filterName, Map<String, Object> filter) throws SMTPAPIException {
+        setInMap(FIELD_FILTERS, filterName, toFilterMap(filter));
+        return this;
+    }
+
+    public SMTPAPI setSettingInFilter(String filterName, String settingName, Object settingVal) throws SMTPAPIException {
+        if (!(settingVal instanceof Integer) && !(settingVal instanceof String)) {
+            throw new SMTPAPIException("Filter setting value must be an integer or a String");
+        }
+        JSONObject filters = header.optJSONObject(FIELD_FILTERS);
+        if (filters == null) {
+            filters = new JSONObject();
+        }
+        JSONObject filter = filters.optJSONObject(filterName);
+        if (filter == null) {
+            filter = new JSONObject();
+        }
+        JSONObject settings = filter.optJSONObject(FIELD_SETTINGS);
+        if (settings == null) {
+            settings = new JSONObject();
+        }
+        settings.put(settingName, settingVal);
+        filter.put(FIELD_SETTINGS, settings);
+        filters.put(filterName, filter);
+        header.put(FIELD_FILTERS, filters);
+        return this;
+    }
+
+    private Integer getInt(String field) {
+        try {
+            return header.getInt(field);
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    private String getStringFromMap(String field, String key) {
+        JSONObject json = header.optJSONObject(field);
+        return json == null? null : json.optString(key, null);
+    }
+
+    private List<String> getListOfStringsFromMap(String field, String key) {
+        JSONObject json = header.optJSONObject(field);
+        if (json != null) {
+            return toListOfStrings(json.optJSONArray(key));
+        }
+        return Collections.emptyList();
+    }
+
+    private void setInMap(String field, String key, String val) {
+        JSONObject json = header.optJSONObject(field);
+        if (json == null) {
+            json = new JSONObject();
+        }
+        json.put(key, val);
+        header.put(field, json);
+    }
+
+    private void setInMap(String field, String key, List<String> vals) {
+        JSONObject json = header.optJSONObject(field);
+        if (json == null) {
+            json = new JSONObject();
+        }
+        json.put(key, vals);
+        header.put(field, json);
+    }
+
+    private void setInMap(String field, String key, Map<String, Map<String, Object>> val) {
+        JSONObject json = header.optJSONObject(field);
+        if (json == null) {
+            json = new JSONObject();
+        }
+        json.put(key, val);
+        header.put(field, json);
+    }
+
+    private void appendToListInMap(String field, String key, String val) {
+        JSONObject json = header.optJSONObject(field);
+        if (json == null) {
+            json = new JSONObject();
+        }
+        json.append(key, val);
+        header.put(field, json);
+    }
+
+    private List<String> toListOfStrings(JSONArray json) {
         List<String> parse = new ArrayList<String>();
-        for (int i = 0; i < json.length(); i++) {
-            parse.add(json.getString(i));
+        if (json != null) {
+            for (int i = 0; i < json.length(); i++) {
+                parse.add(json.optString(i, null));
+            }
         }
-        return parse.toArray(new String[parse.size()]);
+        return parse;
     }
 
-    public SMTPAPI addTo(String to) throws JSONException {
-        if (!this.header.has("to")) {
-            this.header.put("to", new JSONArray());
+    private Map<String, Object> toMap(JSONObject json) {
+        Map<String, Object> parse = new HashMap<String, Object>();
+        if (json != null) {
+            for (Object key : json.keySet()) {
+                if (key instanceof String) {
+                    String keyString = (String) key;
+                    parse.put(keyString, json.opt(keyString));
+                }
+            }
         }
-        this.header.accumulate("to", to);
-        return this;
+        return parse;
     }
 
-    public SMTPAPI addTos(String[] tos) throws JSONException {
-        for (String to : tos) {
-            addTo(to);
+    private Map<String, String> toMapOfStrings(JSONObject json) {
+        Map<String, String> parse = new HashMap<String, String>();
+        if (json != null) {
+            for (Object key : json.keySet()) {
+                if (key instanceof String) {
+                    String keyString = (String) key;
+                    parse.put(keyString, json.optString(keyString, null));
+                }
+            }
         }
-        return this;
+        return parse;
     }
 
-    public SMTPAPI setTos(String[] tos) throws JSONException {
-        this.header.put("to", new JSONArray(tos));
-        return this;
-    }
-
-    public String[] getTos() throws JSONException {
-        return SMTPAPI.toArray(this.header.getJSONArray("to"));
-    }
-
-    public SMTPAPI addSubstitution(String key, String val) throws JSONException {
-        if (this.header.isNull("sub")) {
-            this.header.put("sub", new JSONObject());
+    private Map<String, List<String>> toMapOfListsOfStrings(JSONObject json) {
+        Map<String, List<String>> parse = new HashMap<String, List<String>>();
+        if (json != null) {
+            for (Object key : json.keySet()) {
+                if (key instanceof String) {
+                    String keyString = (String) key;
+                    JSONArray array = json.optJSONArray(keyString);
+                    parse.put(keyString, toListOfStrings(array));
+                }
+            }
         }
-        JSONObject subs = this.header.getJSONObject("sub");
-        if (!subs.has(key)) {
-            subs.put(key, new JSONArray());
+        return parse;
+    }
+
+    private Map<String, Map<String, Object>> toFilterMap(Map<String, Object> filter) throws SMTPAPIException {
+        Map<String, Map<String, Object>> filterMap = new HashMap<String, Map<String, Object>>();
+        if (filter != null) {
+            Map<String, Object> settingsMap = new HashMap<String, Object>();
+            for (Map.Entry<String, Object> setting : filter.entrySet()) {
+                Object settingVal = setting.getValue();
+                if (!(settingVal instanceof Integer) && !(settingVal instanceof String)) {
+                    throw new SMTPAPIException("Filter setting value must be an integer or a String");
+                }
+                settingsMap.put(setting.getKey(), settingVal);
+            }
+            filterMap.put(FIELD_SETTINGS, settingsMap);
         }
-        subs.accumulate(key, val);
-        return this;
+        return filterMap;
     }
 
-    public SMTPAPI addSubstitutions(String key, String[] vals) throws JSONException {
-        for (String val : vals) {
-            addSubstitution(key, val);
+    private Map<String, Object> toFilter(JSONObject json) {
+        if (json != null) {
+            return toMap(json.optJSONObject(FIELD_SETTINGS));
+        } else {
+            return Collections.emptyMap();
         }
-        return this;
-    }
-
-    public SMTPAPI setSubstitutions(JSONObject subs) throws JSONException {
-        this.header.put("sub", subs);
-        return this;
-    }
-
-    public JSONObject getSubstitutions() throws JSONException {
-        return this.header.getJSONObject("sub");
-    }
-
-    public SMTPAPI addUniqueArg(String key, String val) throws JSONException {
-        if (this.header.isNull("unique_args")) {
-            this.header.put("unique_args", new JSONObject());
-        }
-        this.header.getJSONObject("unique_args").put(key, val);
-        return this;
-    }
-
-    public SMTPAPI setUniqueArgs(Map<String, String> args) throws JSONException {
-        this.header.put("unique_args", args);
-        return this;
-    }
-
-    public SMTPAPI setUniqueArgs(JSONObject args) throws JSONException {
-        this.header.put("unique_args", args);
-        return this;
-    }
-
-    public JSONObject getUniqueArgs() throws JSONException {
-        return this.header.getJSONObject("unique_args");
-    }
-
-    public SMTPAPI addCategory(String val) throws JSONException {
-        if (!this.header.has("category")) {
-            this.header.put("category", new JSONArray());
-        }
-        this.header.accumulate("category", val);
-        return this;
-    }
-
-    public SMTPAPI addCategories(String[] vals) throws JSONException {
-        for (String val : vals) {
-            addCategory(val);
-        }
-        return this;
-    }
-
-    public SMTPAPI setCategories(String[] categories) throws JSONException {
-        this.header.put("category", categories);
-        return this;
-    }
-
-    public String[] getCategories() throws JSONException {
-        return SMTPAPI.toArray(this.header.getJSONArray("category"));
-    }
-
-    public SMTPAPI addSection(String key, String val) throws JSONException {
-        if (this.header.isNull("section")) {
-            this.header.put("section", new JSONObject());
-        }
-        this.header.getJSONObject("section").put(key, val);
-        return this;
-    }
-
-    public SMTPAPI setSections(Map<String, String> sections) throws JSONException {
-        return this.setSections(new JSONObject(sections));
-    }
-
-    public SMTPAPI setSections(JSONObject sections) throws JSONException {
-        this.header.put("section", sections);
-        return this;
-    }
-
-    public JSONObject getSections() throws JSONException {
-        return this.header.getJSONObject("section");
-    }
-
-    public SMTPAPI addFilter(String filter, String setting, String val) throws JSONException {
-        if (this.header.isNull("filters")) {
-            this.header.put("filters", new JSONObject());
-        }
-        if (this.header.getJSONObject("filters").isNull(filter)) {
-            this.header.getJSONObject("filters").put(filter, new JSONObject());
-            this.header.getJSONObject("filters").getJSONObject(filter).put("settings", new JSONObject());
-        }
-        this.header.getJSONObject("filters").getJSONObject(filter).getJSONObject("settings").put(setting, val);
-        return this;
-    }
-
-    public SMTPAPI addFilter(String filter, String setting, int val) throws JSONException {
-        if (this.header.isNull("filters")) {
-            this.header.put("filters", new JSONObject());
-        }
-        if (this.header.getJSONObject("filters").isNull(filter)) {
-            this.header.getJSONObject("filters").put(filter, new JSONObject());
-            this.header.getJSONObject("filters").getJSONObject(filter).put("settings", new JSONObject());
-        }
-        this.header.getJSONObject("filters").getJSONObject(filter).getJSONObject("settings").put(setting, val);
-        return this;
-    }
-
-    public SMTPAPI setFilters(JSONObject filters) throws JSONException {
-        this.header.put("filters", filters);
-        return this;
-    }
-
-    public JSONObject getFilters() throws JSONException {
-        return this.header.getJSONObject("filters");
-    }
-
-    public SMTPAPI setASMGroupId(int val) throws JSONException {
-        this.header.put("asm_group_id", val);
-        return this;
-    }
-
-    public Integer getASMGroupId() throws JSONException {
-        return this.header.has("asm_group_id") ? this.header.optInt("asm_group_id") : null;
-    }
-
-    public SMTPAPI setSendAt(int sendAt) throws JSONException {
-        this.header.put("send_at", sendAt);
-        return this;
-    }
-
-    public int getSendAt() throws JSONException {
-        return this.header.getInt("send_at");
-    }
-
-    public SMTPAPI setIpPool(String ipPool) throws JSONException {
-        this.header.put("ip_pool", ipPool);
-        return this;
-    }
-
-    public String getIpPool() throws JSONException {
-        return this.header.getString("ip_pool");
-    }
-
-    // convert from string to code point array
-    private int[] toCodePointArray(String input) {
-        int len = input.length();
-        int[] codePointArray = new int[input.codePointCount(0, len)];
-        for (int i = 0, j = 0; i < len; i = input.offsetByCodePoints(i, 1)) {
-            codePointArray[j++] = input.codePointAt(i);
-        }
-        return codePointArray;
     }
 
     private String escapeUnicode(String input) {
@@ -240,11 +365,12 @@ public class SMTPAPI {
         return sb.toString();
     }
 
-    public String jsonString() {
-        return escapeUnicode(this.header.toString());
-    }
-
-    public String rawJsonString() {
-        return this.header.toString();
+    private int[] toCodePointArray(String input) {
+        int len = input.length();
+        int[] codePointArray = new int[input.codePointCount(0, len)];
+        for (int i = 0, j = 0; i < len; i = input.offsetByCodePoints(i, 1)) {
+            codePointArray[j++] = input.codePointAt(i);
+        }
+        return codePointArray;
     }
 }
