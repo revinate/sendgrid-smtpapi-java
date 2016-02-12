@@ -1,144 +1,129 @@
-# SendGrid SMTPAPI for Java
+# SendGrid SMTP API Java Bindings
 
-This module will let you build SendGrid's SMTP API headers with simplicity.
+This module lets you build SendGrid's SMTP API headers with simplicity.
 
 [![BuildStatus](https://travis-ci.org/revinate/sendgrid-smtpapi-java.svg?branch=master)](https://travis-ci.org/revinate/sendgrid-smtpapi-java)
 [![BuildStatus](https://maven-badges.herokuapp.com/maven-central/com.revinate/sendgrid-smtpapi-java/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.revinate/sendgrid-smtpapi-java)
 
-## Installing
+## Requirements
 
-### Maven w/ Gradle
+Java 1.6 and later.
+
+## Installation
+
+### Maven
+
+Add this dependency to your project's POM:
+
+```xml
+<dependency>
+  <groupId>com.revinate</groupId>
+  <artifactId>sendgrid-smtpapi-java</artifactId>
+  <version>2.0.0</version>
+</dependency>
+```
+
+### Gradle
+
+Add this dependency to your project's build script:
 
 ```groovy
-...
-dependencies {
-  ...
-  compile 'com.revinate:sendgrid-smtpapi-java:1.2.1'
-}
-
-repositories {
-  mavenCentral()
-}
-...
+compile 'com.revinate:sendgrid-smtpapi-java:2.0.0'
 ```
 
-Then import the library - in the file appropriate to your Java project.
+## Usage
+
+### Create header
 
 ```java
-import com.revinate.sendgrid.smtpapi.SMTPAPI;
+import com.revinate.sendgrid.smtpapi.*;
+SmtpApi header = new SmtpApiImpl();
 ```
 
-## Examples
-
-### Create headers
+### Get header value
 
 ```java
-import com.revinate.sendgrid.smtpapi.SMTPAPI;
-SMTPAPI header = new SMTPAPI();
+String headerValue = header.toSmtpApiHeader();
+```
+
+If you need the unescaped JSON string:
+
+```java
+String rawHeaderValue = header.toRawSmtpApiHeader();
 ```
 
 ### [To](http://sendgrid.com/docs/API_Reference/SMTP_API/index.html)
-```java
-header.addTo("email@email.com");
-// or
-header.addTo(["email@email.com"]);
-// or
-header.setTos(["email@email.com"]);
 
-String[] tos = header.getTos();
+```java
+header.addSmtpApiTo("email@email.com");
+// or
+header.addSmtpApiTo("email@email.com", "Email User");
+
+List<String> tos = header.getSmtpApiTos();
 ```
 
 ### [Substitutions](http://sendgrid.com/docs/API_Reference/SMTP_API/substitution_tags.html)
 
 ```java
-header.addSubstitution("key", "value");
+header.addValueToSubstitution("key", "value");
 
-JSONObject subs = header.getSubstitutions();
+List<String> substitution = header.getSubstitution("key");
 ```
 
 ### [Unique Arguments](http://sendgrid.com/docs/API_Reference/SMTP_API/unique_arguments.html)
 
 ```java
-header.addUniqueAarg("key", "value");
-// or
-Map map = new HashMap<String, String>();
-map.put("unique", "value");
-header.setUniqueArgs(map);
-// or
-JSONObject map = new JSONObject();
-map.put("unique", "value");
-header.setUniqueArgs(map);
+header.setUniqueArg("key", "value");
 
-JSONObject args = header.getUniqueArgs();
+String arg = header.getUniqueArg("key");
 ```
+
 ### [Categories](http://sendgrid.com/docs/API_Reference/SMTP_API/categories.html)
 
 ```java
 header.addCategory("category");
-// or
-header.addCategory(["categories"]);
-// or
-header.setCategories(["category1", "category2"]);
 
-String[] cats = header.getCategories();
+List<String> categories = header.getCategories();
 ```
 
 ### [Sections](http://sendgrid.com/docs/API_Reference/SMTP_API/section_tags.html)
 
 ```java
-header.addSection("key", "section");
-// or
-Map newSec = new HashMap();
-newSec.put("-section-", "value");
-header.setSections(newSec);
-// or
-JSONObject newSec = new JSONObject();
-newSec.put("-section-", "value");
-header.setSections(newSec);
+header.setSection("key", "section");
 
-JSONObject sections = header.getSections();
+String section = header.getSection("key");
 ```
 
 ### [Filters](http://sendgrid.com/docs/API_Reference/SMTP_API/apps.html)
 
 ```java
-header.addFilter("filter", "setting", "value");
-header.addFilter("filter", "setting", 1);
+header.setSettingInFilter("filter", "setting", "value");
+header.setSettingInFilter("filter", "setting", 1);
 
-JSONObject filters = header.getFilters();
+Map<String, Object> filter = header.getFilter("filter");
 ```
 
-### [ASM Group Id](https://sendgrid.com/docs/User_Guide/advanced_suppression_manager.html)
+### [ASM Group ID](https://sendgrid.com/docs/User_Guide/advanced_suppression_manager.html)
 
 ```java
-header.setASMGroupId(1);
+header.setAsmGroupId(1);
 
-Integer groupId = header.getASMGroupId();
+Integer groupId = header.getAsmGroupId();
 ```
 
 ### [Scheduling](https://sendgrid.com/docs/API_Reference/SMTP_API/scheduling_parameters.html)
 
 ```java
-header.setSendAt(1416427645)
+header.setSendAt(1416427645);
 
-int sendAt = header.getSendAt();
+Integer sendAt = header.getSendAt();
 ```
 
-### Get Headers
-
+### IP Pool
 ```java
-String headers = header.jsonString();
-```
+header.setIpPool("transactional");
 
-If you need the unescaped JSON string.
-```java
-String rawJson = header.rawJsonString();
-```
-
-## Running Tests
-
-```
-./gradlew check
+String ipPool = header.getIpPool();
 ```
 
 ## License
