@@ -18,16 +18,16 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-public class SMTPAPITest {
+public class SmtpApiTest {
 
-    SMTPAPI test;
+    SmtpApi test;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void initialize() {
-        test = new SMTPAPI();
+        test = new SmtpApi();
     }
 
     @Test
@@ -321,7 +321,7 @@ public class SMTPAPITest {
         filter1.put("setting1", 1.2);
         filters.put("filter1", filter1);
 
-        thrown.expect(SMTPAPIException.class);
+        thrown.expect(SmtpApiException.class);
         thrown.expectMessage("Filter setting value must be an integer or a String");
 
         test.setFilters(filters);
@@ -375,7 +375,7 @@ public class SMTPAPITest {
         Map<String, Object> filter1 = new HashMap<String, Object>();
         filter1.put("setting1", 1.2);
 
-        thrown.expect(SMTPAPIException.class);
+        thrown.expect(SmtpApiException.class);
         thrown.expectMessage("Filter setting value must be an integer or a String");
 
         test.setFilter("filter1", filter1);
@@ -391,7 +391,7 @@ public class SMTPAPITest {
 
     @Test
     public void setSettingInFilter_shouldThrowException() throws Exception {
-        thrown.expect(SMTPAPIException.class);
+        thrown.expect(SmtpApiException.class);
         thrown.expectMessage("Filter setting value must be an integer or a String");
 
         test.setSettingInFilter("filter1", "settings1", 1.2);

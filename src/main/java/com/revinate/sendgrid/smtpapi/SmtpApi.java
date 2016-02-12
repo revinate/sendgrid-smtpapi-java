@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 import java.util.*;
 
-public class SMTPAPI {
+public class SmtpApi {
 
     private static final String VERSION = "1.2.1";
 
@@ -40,7 +40,7 @@ public class SMTPAPI {
         return getInt(FIELD_ASM_GROUP_ID);
     }
 
-    public SMTPAPI setAsmGroupId(Integer val) {
+    public SmtpApi setAsmGroupId(Integer val) {
         header.put(FIELD_ASM_GROUP_ID, val);
         return this;
     }
@@ -49,7 +49,7 @@ public class SMTPAPI {
         return getInt(FIELD_SEND_AT);
     }
 
-    public SMTPAPI setSendAt(Integer val) {
+    public SmtpApi setSendAt(Integer val) {
         header.put(FIELD_SEND_AT, val);
         return this;
     }
@@ -58,7 +58,7 @@ public class SMTPAPI {
         return header.optString(FIELD_IP_POOL, null);
     }
 
-    public SMTPAPI setIpPool(String ipPool) {
+    public SmtpApi setIpPool(String ipPool) {
         header.put(FIELD_IP_POOL, ipPool);
         return this;
     }
@@ -67,17 +67,17 @@ public class SMTPAPI {
         return toListOfStrings(header.optJSONArray(FIELD_TO));
     }
 
-    public SMTPAPI setSmtpApiTos(List<String> tos) {
+    public SmtpApi setSmtpApiTos(List<String> tos) {
         header.put(FIELD_TO, tos);
         return this;
     }
 
-    public SMTPAPI addSmtpApiTo(String to) {
+    public SmtpApi addSmtpApiTo(String to) {
         header.append(FIELD_TO, to);
         return this;
     }
 
-    public SMTPAPI addSmtpApiTo(String to, String name) {
+    public SmtpApi addSmtpApiTo(String to, String name) {
         return addSmtpApiTo(String.format(EMAIL_FORMAT, name, to));
     }
 
@@ -85,12 +85,12 @@ public class SMTPAPI {
         return toListOfStrings(header.optJSONArray(FIELD_CATEGORY));
     }
 
-    public SMTPAPI setCategories(List<String> categories) {
+    public SmtpApi setCategories(List<String> categories) {
         header.put(FIELD_CATEGORY, categories);
         return this;
     }
 
-    public SMTPAPI addCategory(String category) {
+    public SmtpApi addCategory(String category) {
         header.append(FIELD_CATEGORY, category);
         return this;
     }
@@ -99,7 +99,7 @@ public class SMTPAPI {
         return toMapOfStrings(header.optJSONObject(FIELD_UNIQUE_ARGS));
     }
 
-    public SMTPAPI setUniqueArgs(Map<String, String> args) {
+    public SmtpApi setUniqueArgs(Map<String, String> args) {
         header.put(FIELD_UNIQUE_ARGS, args);
         return this;
     }
@@ -108,7 +108,7 @@ public class SMTPAPI {
         return getStringFromMap(FIELD_UNIQUE_ARGS, key);
     }
 
-    public SMTPAPI setUniqueArg(String key, String val) {
+    public SmtpApi setUniqueArg(String key, String val) {
         setInMap(FIELD_UNIQUE_ARGS, key, val);
         return this;
     }
@@ -117,7 +117,7 @@ public class SMTPAPI {
         return toMapOfStrings(header.optJSONObject(FIELD_SECTION));
     }
 
-    public SMTPAPI setSections(Map<String, String> sections) {
+    public SmtpApi setSections(Map<String, String> sections) {
         header.put(FIELD_SECTION, sections);
         return this;
     }
@@ -126,7 +126,7 @@ public class SMTPAPI {
         return getStringFromMap(FIELD_SECTION, key);
     }
 
-    public SMTPAPI setSection(String key, String val) {
+    public SmtpApi setSection(String key, String val) {
         setInMap(FIELD_SECTION, key, val);
         return this;
     }
@@ -135,7 +135,7 @@ public class SMTPAPI {
         return toMapOfListsOfStrings(header.optJSONObject(FIELD_SUB));
     }
 
-    public SMTPAPI setSubstitutions(Map<String, List<String>> substitutions) {
+    public SmtpApi setSubstitutions(Map<String, List<String>> substitutions) {
         header.put(FIELD_SUB, substitutions);
         return this;
     }
@@ -144,12 +144,12 @@ public class SMTPAPI {
         return getListOfStringsFromMap(FIELD_SUB, key);
     }
 
-    public SMTPAPI setSubstitution(String key, List<String> vals) {
+    public SmtpApi setSubstitution(String key, List<String> vals) {
         setInMap(FIELD_SUB, key, vals);
         return this;
     }
 
-    public SMTPAPI addValueToSubstitution(String key, String val) {
+    public SmtpApi addValueToSubstitution(String key, String val) {
         appendToListInMap(FIELD_SUB, key, val);
         return this;
     }
@@ -169,7 +169,7 @@ public class SMTPAPI {
         return filters;
     }
 
-    public SMTPAPI setFilters(Map<String, Map<String, Object>> filters) throws SMTPAPIException {
+    public SmtpApi setFilters(Map<String, Map<String, Object>> filters) throws SmtpApiException {
         Map<String, Map<String, Map<String, Object>>> filtersMap =
                 new HashMap<String, Map<String, Map<String, Object>>>();
         for (Map.Entry<String, Map<String, Object>> filter : filters.entrySet()) {
@@ -188,14 +188,14 @@ public class SMTPAPI {
         }
     }
 
-    public SMTPAPI setFilter(String filterName, Map<String, Object> filter) throws SMTPAPIException {
+    public SmtpApi setFilter(String filterName, Map<String, Object> filter) throws SmtpApiException {
         setInMap(FIELD_FILTERS, filterName, toFilterMap(filter));
         return this;
     }
 
-    public SMTPAPI setSettingInFilter(String filterName, String settingName, Object settingVal) throws SMTPAPIException {
+    public SmtpApi setSettingInFilter(String filterName, String settingName, Object settingVal) throws SmtpApiException {
         if (!(settingVal instanceof Integer) && !(settingVal instanceof String)) {
-            throw new SMTPAPIException("Filter setting value must be an integer or a String");
+            throw new SmtpApiException("Filter setting value must be an integer or a String");
         }
         JSONObject filters = header.optJSONObject(FIELD_FILTERS);
         if (filters == null) {
@@ -323,14 +323,14 @@ public class SMTPAPI {
         return parse;
     }
 
-    private Map<String, Map<String, Object>> toFilterMap(Map<String, Object> filter) throws SMTPAPIException {
+    private Map<String, Map<String, Object>> toFilterMap(Map<String, Object> filter) throws SmtpApiException {
         Map<String, Map<String, Object>> filterMap = new HashMap<String, Map<String, Object>>();
         if (filter != null) {
             Map<String, Object> settingsMap = new HashMap<String, Object>();
             for (Map.Entry<String, Object> setting : filter.entrySet()) {
                 Object settingVal = setting.getValue();
                 if (!(settingVal instanceof Integer) && !(settingVal instanceof String)) {
-                    throw new SMTPAPIException("Filter setting value must be an integer or a String");
+                    throw new SmtpApiException("Filter setting value must be an integer or a String");
                 }
                 settingsMap.put(setting.getKey(), settingVal);
             }
