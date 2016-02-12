@@ -27,7 +27,7 @@ public class SmtpApiTest {
 
     @Before
     public void initialize() {
-        test = new SmtpApi();
+        test = new SmtpApiImpl();
     }
 
     @Test
